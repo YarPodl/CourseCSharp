@@ -22,8 +22,7 @@ namespace Course
         SqlCommandBuilder commandBuilder;
         private SqlDataAdapter AdapterMainTable;
         private SqlDataAdapter AdapterSecondTable;
-        private SqlDataAdapter adapter_Teachers;
-        private SqlDataAdapter adapter_Subjects;
+        private SqlDataAdapter AdapterOtherTable;
 
         //string connectionString = @"Data Source=DESKTOP-OT4EBDA;Integrated Security=True";
         string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\PGU\C#\Курсовая\v2\Course\Course\Database1.mdf;Integrated Security=True";
@@ -47,92 +46,17 @@ namespace Course
         {
             comboBox1.SelectedIndex = 0;
             LoadData(comboBox1.SelectedIndex);
-            /*
-            SqlConnection connection = new SqlConnection(connectionString);
-            try
-            {
-                
-                // Открываем подключение
-                connection.Open();
-                //adapter_Students = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Студенты", connection);
-                //adapter_Groups = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Группы", connection);
-                //adapter_Teachers = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Преподаватели", connection);
-                //adapter_Subjects = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Предметы", connection);
-
-                adapter_Students = new SqlDataAdapter("SELECT * FROM Студент", connection);
-                adapter_Groups = new SqlDataAdapter("SELECT * FROM Группа", connection);
-                // Создаем объект Dataset
-                ds = new DataSet();
-                // Заполняем Dataset
-                adapter_Students.Fill(ds, "Студенты"); // прочитать books
-                adapter_Groups.Fill(ds, "Группы"); // прочитать series
-                // Отображаем данные
-                dataGridView1.DataSource = ds.Tables[0];
-                ds.Relations.Add(new DataRelation("rlSeriesBooks", ds.Tables["Группы"].Columns["id"], ds.Tables["Студенты"].Columns["Группа"]));
-                dataGridView1.DataSource = ds.Tables["Студенты"]; // Books - в DataGrid
-
-                dataGridView1.Columns["Группа"].Visible = false; // скрыть колонку с идентификатором
-                dataGridView1.Columns["id"].Visible = false; // скрыть колонку с идентификатором
-
-                var ComboBoxColumn_Groups = new DataGridViewComboBoxColumn
-                {
-                    Name = "Группа",
-                    DataSource = ds.Tables["Группы"],
-                    DisplayMember = "Название", // Отображать из Series
-                    ValueMember = "id",
-                    DataPropertyName = "Группа", // Для связи с Books
-                    MaxDropDownItems = 10,
-                    FlatStyle = FlatStyle.Flat
-                }; // добавить новую колонку
-                dataGridView1.Columns.Insert(5, ComboBoxColumn_Groups);
-                dataGridView1.Columns[5].Width = 200;
-                
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                // закрываем подключение
-                connection.Close();
-            }
-            */
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonSave_Click(object sender, EventArgs e)
         {
             SaveData(comboBox1.SelectedIndex);
-            /*
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //connection.Open();
-                //adapter = new SqlDataAdapter(command, connection);
-                //commandBuilder = new SqlCommandBuilder(adapter);
-                ////adapter.InsertCommand = new SqlCommand("sp_CreateUser", connection);
-                ////adapter.InsertCommand.CommandType = CommandType.StoredProcedure;
-                ////adapter.InsertCommand.Parameters.Add(new SqlParameter("@name", SqlDbType.NVarChar, 50, "Name"));
-                ////adapter.InsertCommand.Parameters.Add(new SqlParameter("@age", SqlDbType.Int, 0, "Age"));
-
-                ////SqlParameter parameter = adapter.InsertCommand.Parameters.Add("@Id", SqlDbType.Int, 0, "Id");
-                ////parameter.Direction = ParameterDirection.Output;
-
-                //adapter.Update(ds);
-
-
-                connection.Open();
-                adapter_Students = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Студенты", connection);
-                adapter_Groups = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Группы", connection);
-                commandBuilder = new SqlCommandBuilder(adapter_Students);
-                commandBuilder = new SqlCommandBuilder(adapter_Groups);
-                adapter_Students.Update(ds, "Студенты");
-                adapter_Groups.Update(ds, "Группы");
-            }
-            */
         }
+
         private void SaveData(int numberView)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
             {
                 connection.Open();
                 AdapterMainTable = new SqlDataAdapter("SELECT * FROM " + names[numberView, 0], connection);
@@ -146,6 +70,23 @@ namespace Course
                     AdapterSecondTable.Update(ds, names[numberView, 1]);
                 }
             }
+            catch(System.FormatException)
+            {
+
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                // закрываем подключение
+                connection.Close();
+            }
         }
 
         private void LoadData(int numberView)
@@ -156,10 +97,6 @@ namespace Course
 
                 // Открываем подключение
                 connection.Open();
-                //adapter_Students = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Студенты", connection);
-                //adapter_Groups = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Группы", connection);
-                //adapter_Teachers = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Преподаватели", connection);
-                //adapter_Subjects = new SqlDataAdapter("SELECT * FROM DataBase2.dbo.Предметы", connection);
 
                 AdapterMainTable = new SqlDataAdapter("SELECT * FROM " + names[numberView, 0], connection);
                 // Создаем объект Dataset
@@ -193,7 +130,15 @@ namespace Course
                     dataGridView1.Columns[4].Width = 200;
                 }
             }
+            //catch (FormatException ex)
+            //{
+            //    MessageBox.Show(ex.ToString());
+            //}
             catch (SqlException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
@@ -207,11 +152,87 @@ namespace Course
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             LoadData(comboBox1.SelectedIndex);
+            dataGridView2.Visible = false;
+            buttonUndo.Visible = false;
         }
 
         private void dataGridView1_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
+           
+        }
 
+        private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            //dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].InheritedStyle.BackColor = Color.Red;
+        }
+
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            dataGridView2.Visible = true;
+            buttonUndo.Visible = true;
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+
+                // Открываем подключение
+                connection.Open();
+                string studentId = dataGridView1.Rows[e.RowIndex].Cells["id"].Value.ToString();
+                AdapterOtherTable = new SqlDataAdapter("SELECT * FROM Студент_предмет WHERE Студент=" + studentId, connection);
+                // Создаем объект Dataset
+                DataSet ds = new DataSet();
+                // Заполняем Dataset
+                AdapterOtherTable.Fill(ds); // прочитать 
+                // Отображаем данные
+                dataGridView2.DataSource = ds.Tables[0];
+
+                //if (numberView != 2)
+                //{
+                //    AdapterSecondTable = new SqlDataAdapter("SELECT * FROM " + names[numberView, 1], connection);
+                //    AdapterSecondTable.Fill(ds, names[numberView, 1]); // прочитать 
+                //    ds.Relations.Add(new DataRelation("relation", ds.Tables[names[numberView, 1]].Columns["id"], ds.Tables[names[numberView, 0]].Columns[names[numberView, 2]]));
+                //    //dataGridView1.DataSource = ds.Tables[names[numberView, 0]]; 
+
+                //    dataGridView1.Columns[names[numberView, 2]].Visible = false; // скрыть колонку с идентификатором
+                //    dataGridView1.Columns["id"].Visible = false; // скрыть колонку с идентификатором
+
+                //    var ComboBoxColumn = new DataGridViewComboBoxColumn
+                //    {
+                //        Name = names[numberView, 2],
+                //        DataSource = ds.Tables[names[numberView, 1]],
+                //        DisplayMember = names[numberView, 3], // Отображать 
+                //        ValueMember = "id",
+                //        DataPropertyName = names[numberView, 2], // Для связи с 
+                //        MaxDropDownItems = 10,
+                //        FlatStyle = FlatStyle.Flat
+                //    }; // добавить новую колонку
+                //    dataGridView1.Columns.Add(ComboBoxColumn);
+                //    dataGridView1.Columns[dataGridView1.ColumnCount - 1].Width = 200;
+                //}
+            }
+            //catch (FormatException ex)
+            //{
+            //    MessageBox.Show(ex.ToString());
+            //}
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                // закрываем подключение
+                connection.Close();
+            }
+        }
+
+        private void buttonUndo_Click(object sender, EventArgs e)
+        {
+
+            dataGridView2.Visible = false;
+            buttonUndo.Visible = false;
         }
     }
 }
